@@ -13,4 +13,4 @@ jobs:
     steps:
       - name: Send Traffic to Render
         run: |
-          curl -s https://your-live-render-app.onrender.com
+          curl -s https://expenses-ppci.onrender.com
