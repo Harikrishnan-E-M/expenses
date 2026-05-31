@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import render_field, submit_button %}
+{% block title %}Login | FinTrack INR{% endblock %}
+{% block content %}
+<div class="row justify-content-center auth-shell align-items-center py-4 py-lg-5">
+  <div class="col-12 col-md-8 col-lg-5">
+    <div class="ft-card p-4 p-lg-5">
+      <div class="mb-4">
+        <span class="ft-chip mb-3">Secure login</span>
+        <h1 class="h3 fw-bold mb-2">Welcome back</h1>
+        <p class="ft-soft mb-0">Sign in to review income, expenses, wallets, and reports in ₹ INR.</p>
+      </div>
+      <form method="post">
+        {{ form.hidden_tag() }}
+        {{ render_field(form.email) }}
+        {{ render_field(form.password) }}
+        {{ submit_button('Login') }}
+      </form>
+      <div class="mt-4 text-center">
+        <span class="ft-soft">No account yet?</span> <a href="{{ url_for('auth.register') }}">Create one</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

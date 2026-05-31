@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | FinTrack INR{% endblock %}
+{% block content %}
+<div class="page-hero p-4 p-lg-5 mb-4">
+  <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-end">
+    <div>
+      <span class="ft-chip mb-3">Home overview</span>
+      <h1 class="h2 fw-bold mb-2">Hello, {{ current_user.name }}</h1>
+      <p class="ft-soft mb-0">A real-time snapshot of your cash flow, wallets, and recent activity.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-primary" href="{{ url_for('expenses.new') }}">Add Expense</a>
+      <a class="btn btn-success" href="{{ url_for('income.new') }}">Add Income</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('wallets.new') }}">Add Wallet</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('categories.index') }}">Add Category</a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 g-lg-4 mb-4">
+  <div class="col-12 col-md-6 col-xl-3"><div class="ft-summary p-4"><div class="ft-soft mb-1">Current Month Income</div><div class="ft-summary-value text-success">₹ {{ '%.2f'|format(summary.income_total) }}</div></div></div>
+  <div class="col-12 col-md-6 col-xl-3"><div class="ft-summary p-4"><div class="ft-soft mb-1">Current Month Expenses</div><div class="ft-summary-value text-danger">₹ {{ '%.2f'|format(summary.expense_total) }}</div></div></div>
+  <div class="col-12 col-md-6 col-xl-3"><div class="ft-summary p-4"><div class="ft-soft mb-1">Current Month Savings</div><div class="ft-summary-value">₹ {{ '%.2f'|format(summary.savings) }}</div></div></div>
+  <div class="col-12 col-md-6 col-xl-3"><div class="ft-summary p-4"><div class="ft-soft mb-1">Total Balance Across Wallets</div><div class="ft-summary-value">₹ {{ '%.2f'|format(summary.wallet_total) }}</div></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-12 col-xl-6">
+    <div class="ft-card p-4 ft-chart-card">
+      <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 fw-bold mb-0">Expense Snapshot</h2><span class="ft-chip">Current month</span></div>
+      <div class="ratio ratio-1x1"><canvas id="dashboardExpenseChart"></canvas></div>
+      <script type="application/json" id="dashboardExpenseChartData">{{ expense_chart|tojson }}</script>
+    </div>
+  </div>
+  <div class="col-12 col-xl-6">
+    <div class="ft-card p-4 ft-chart-card">
+      <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 fw-bold mb-0">Income Snapshot</h2><span class="ft-chip">Current month</span></div>
+      <div class="ratio ratio-1x1"><canvas id="dashboardIncomeChart"></canvas></div>
+      <script type="application/json" id="dashboardIncomeChartData">{{ income_chart|tojson }}</script>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-6">
+    <div class="ft-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 fw-bold mb-0">Today's Income</h2>
+        <span class="badge badge-soft-success rounded-pill">{{ today_income|length }}</span>
+      </div>
+      {% if today_income %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead><tr><th>Title</th><th>Wallet</th><th class="text-end">Amount</th></tr></thead>
+          <tbody>
+            {% for item in today_income %}
+            <tr><td>{{ item.title }}</td><td>{{ item.wallet_name }}</td><td class="text-end text-success">₹ {{ '%.2f'|format(item.amount) }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}<div class="empty-state">No income recorded today.</div>{% endif %}
+    </div>
+  </div>
+  <div class="col-12 col-lg-6">
+    <div class="ft-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 fw-bold mb-0">Today's Expenses</h2>
+        <span class="badge badge-soft-danger rounded-pill">{{ today_expenses|length }}</span>
+      </div>
+      {% if today_expenses %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead><tr><th>Title</th><th>Wallet</th><th class="text-end">Amount</th></tr></thead>
+          <tbody>
+            {% for item in today_expenses %}
+            <tr><td>{{ item.title }}</td><td>{{ item.wallet_name }}</td><td class="text-end text-danger">₹ {{ '%.2f'|format(item.amount) }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}<div class="empty-state">No expenses recorded today.</div>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

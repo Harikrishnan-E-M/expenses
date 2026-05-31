@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import render_field, submit_button %}
+{% block title %}Edit Category | FinTrack INR{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-6">
+    <div class="ft-card p-4 p-lg-5">
+      <h1 class="h3 fw-bold mb-2">Edit {{ category_type|title }} Category</h1>
+      <p class="ft-soft mb-4">Update category labels without changing historical transactions.</p>
+      <form method="post">
+        {{ form.hidden_tag() }}
+        {{ render_field(form.category_type) }}
+        {{ render_field(form.name) }}
+        {{ submit_button('Update Category') }}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

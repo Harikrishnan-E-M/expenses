@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import render_field, submit_button %}
+{% block title %}Verify OTP | FinTrack INR{% endblock %}
+{% block content %}
+<div class="row justify-content-center py-4 py-lg-5">
+  <div class="col-12 col-md-8 col-lg-5">
+    <div class="ft-card p-4 p-lg-5">
+      <span class="ft-chip mb-3">Email verification</span>
+      <h1 class="h3 fw-bold mb-2">Verify your OTP</h1>
+      <p class="ft-soft mb-4">Enter the 6-digit code sent to your email address.</p>
+      <form method="post">
+        {{ form.hidden_tag() }}
+        {{ render_field(form.name) }}
+        {{ render_field(form.email) }}
+        {{ render_field(form.otp) }}
+        {{ submit_button('Verify OTP') }}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

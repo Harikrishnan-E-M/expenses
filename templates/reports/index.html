@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import render_field, submit_button %}
+{% block title %}Reports | FinTrack INR{% endblock %}
+
+{% block head %}
+<style>
+/* ── Report filter card ─────────────────────────────────── */
+.report-filter-card {
+  background: var(--ft-card-bg, #1e2330);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+/* Period toggle pills */
+.period-toggle { display: flex; gap: .5rem; flex-wrap: wrap; }
+.period-btn {
+  cursor: pointer;
+  padding: .45rem 1.25rem;
+  border-radius: 50px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: var(--ft-soft, #9aa3b8);
+  font-weight: 600;
+  font-size: .875rem;
+  transition: all .2s ease;
+  user-select: none;
+}
+.period-btn:hover { border-color: rgba(99,102,241,.6); color: #c7c9f9; }
+.period-btn.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(99,102,241,.35);
+}
+
+/* Range select */
+#range-select-wrap { min-width: 220px; }
+#range-select-wrap select {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  color: #e2e8f0;
+  border-radius: 10px;
+  padding: .5rem .9rem;
+  font-size: .9rem;
+  transition: border-color .2s;
+  width: 100%;
+}
+#range-select-wrap select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,.2);
+}
+#range-select-wrap select option { background: #1e2330; }
+
+/* Spinner */
+.range-spinner { display: none; align-items: center; gap: .5rem; color: var(--ft-soft, #9aa3b8); font-size: .85rem; }
+.range-spinner.visible { display: flex; }
+.range-spinner .spinner-border { width: 1rem; height: 1rem; border-width: 2px; }
+
+/* Generate button */
+#btn-generate {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none; color: #fff;
+  padding: .5rem 1.4rem;
+  border-radius: 10px;
+  font-weight: 600; font-size: .9rem;
+  cursor: pointer;
+  transition: opacity .2s, transform .15s;
+  white-space: nowrap;
+}
+#btn-generate:hover { opacity: .88; transform: translateY(-1px); }
+#btn-generate:active { transform: translateY(0); }
+
+/* Chart section label */
+.chart-section-label {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #9aa3b8;
+  margin-bottom: .75rem;
+  padding-bottom: .4rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.income-label { color: #34d399; }
+.expense-label { color: #f87171; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero p-4 p-lg-5 mb-4">
+  <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-end">
+    <div>
+      <span class="ft-chip mb-3">Reporting center</span>
+      <h1 class="h2 fw-bold mb-2">Reports and analytics</h1>
+      <p class="ft-soft mb-0">Select a period and a specific range, then generate your report.</p>
+    </div>
+    <a class="btn btn-primary" id="pdf-download-btn"
+       href="{{ url_for('reports.pdf', period=period, range_value=range_value) }}">
+      Download PDF
+    </a>
+  </div>
+</div>
+
+<!-- ── Filter card ─────────────────────────────── -->
+<div class="report-filter-card mb-4">
+  <form method="get" id="report-filter-form" class="d-flex flex-wrap align-items-end gap-3">
+    <input type="hidden" name="period" id="period-input" value="{{ period }}">
+    <input type="hidden" name="range_value" id="range-value-input" value="{{ range_value }}">
+
+    <div>
+      <label class="form-label fw-semibold mb-2" style="font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:#9aa3b8;">Period</label>
+      <div class="period-toggle">
+        {% for val, lbl in [('week','Week'), ('month','Month'), ('year','Year')] %}
+        <button type="button" class="period-btn {% if period == val %}active{% endif %}" data-period="{{ val }}">{{ lbl }}</button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div id="range-select-wrap">
+      <label class="form-label fw-semibold mb-2" style="font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:#9aa3b8;">Range</label>
+      <div class="range-spinner" id="range-spinner">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span>Loading…</span>
+      </div>
+      <select id="range-select" {% if not range_options %}disabled{% endif %}>
+        {% for opt in range_options %}
+        <option value="{{ opt.value }}" {% if opt.value == range_value %}selected{% endif %}>{{ opt.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <button type="submit" id="btn-generate">Generate Report</button>
+    </div>
+  </form>
+</div>
+
+<!-- ── Summary tiles ────────────────────────────── -->
+<div class="row g-3 g-lg-4 mb-4">
+  <div class="col-12 col-md-4"><div class="ft-summary p-4"><div class="ft-soft mb-1">Total Income</div><div class="ft-summary-value text-success">₹ {{ '%.2f'|format(summary.total_income) }}</div></div></div>
+  <div class="col-12 col-md-4"><div class="ft-summary p-4"><div class="ft-soft mb-1">Total Expenses</div><div class="ft-summary-value text-danger">₹ {{ '%.2f'|format(summary.total_expense) }}</div></div></div>
+  <div class="col-12 col-md-4"><div class="ft-summary p-4"><div class="ft-soft mb-1">Net Savings</div><div class="ft-summary-value">₹ {{ '%.2f'|format(summary.net_savings) }}</div></div></div>
+</div>
+
+<!-- ── Pie charts: Income LEFT, Expense RIGHT ────── -->
+<div class="row g-4 mb-4">
+  <div class="col-12 col-xl-6">
+    <div class="ft-card p-4 ft-chart-card">
+      <div class="chart-section-label income-label">Income — Category Distribution</div>
+      <div class="ratio ratio-1x1">
+        <canvas id="incomePie"></canvas>
+      </div>
+      <script type="application/json" id="incomePieData">{{ income_pie|tojson }}</script>
+    </div>
+  </div>
+  <div class="col-12 col-xl-6">
+    <div class="ft-card p-4 ft-chart-card">
+      <div class="chart-section-label expense-label">Expense — Category Distribution</div>
+      <div class="ratio ratio-1x1">
+        <canvas id="expensePie"></canvas>
+      </div>
+      <script type="application/json" id="expensePieData">{{ expense_pie|tojson }}</script>
+    </div>
+  </div>
+</div>
+
+<!-- ── Period-specific bar charts ───────────────── -->
+{% for key, chart in period_charts.items() %}
+<div class="row g-4 mb-4">
+  <!-- Income LEFT -->
+  <div class="col-12 col-xl-6">
+    <div class="ft-card p-4 ft-chart-card">
+      <div class="chart-section-label income-label">Income — {{ chart.title }}</div>
+      <canvas id="income_{{ key }}_bar" style="max-height:320px;"></canvas>
+      <script type="application/json" id="income_{{ key }}_barData">{{ chart.income|tojson }}</script>
+    </div>
+  </div>
+  <!-- Expense RIGHT -->
+  <div class="col-12 col-xl-6">
+    <div class="ft-card p-4 ft-chart-card">
+      <div class="chart-section-label expense-label">Expense — {{ chart.title }}</div>
+      <canvas id="expense_{{ key }}_bar" style="max-height:320px;"></canvas>
+      <script type="application/json" id="expense_{{ key }}_barData">{{ chart.expense|tojson }}</script>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<!-- Embed period info for JS -->
+<script type="application/json" id="reportPeriodData">{{ period_charts|tojson }}</script>
+
+<!-- ── Analytics + Report Range (unchanged) ─────── -->
+<div class="row g-4">
+  <div class="col-12 col-lg-6">
+    <div class="ft-card p-4 h-100">
+      <h2 class="h5 fw-bold mb-3">Analytics Summary</h2>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <tbody>
+            <tr><th>Highest Income Category</th><td>{{ summary.highest_income_category }}</td></tr>
+            <tr><th>Lowest Income Category</th><td>{{ summary.lowest_income_category }}</td></tr>
+            <tr><th>Highest Expense Category</th><td>{{ summary.highest_expense_category }}</td></tr>
+            <tr><th>Lowest Expense Category</th><td>{{ summary.lowest_expense_category }}</td></tr>
+            <tr><th>Highest Income Date</th><td>{{ summary.highest_income_date }}</td></tr>
+            <tr><th>Highest Expense Date</th><td>{{ summary.highest_expense_date }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-6">
+    <div class="ft-card p-4 h-100">
+      <h2 class="h5 fw-bold mb-3">Report Range</h2>
+      <p class="mb-2"><strong>Start:</strong> {{ start_date.strftime('%d %b %Y') }}</p>
+      <p class="mb-2"><strong>End:</strong> {{ end_date.strftime('%d %b %Y') }}</p>
+      <p class="mb-0 ft-soft">Download the PDF to keep a professional, multi-page export of the selected period.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %}

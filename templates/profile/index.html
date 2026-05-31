@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import render_field, submit_button %}
+{% block title %}Profile | FinTrack INR{% endblock %}
+{% block content %}
+<div class="page-hero p-4 p-lg-5 mb-4">
+  <span class="ft-chip mb-3">Account profile</span>
+  <h1 class="h2 fw-bold mb-2">Your profile</h1>
+  <p class="ft-soft mb-0">Review account details, change your password, or permanently delete your records.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-5">
+    <div class="ft-card p-4 h-100">
+      <h2 class="h5 fw-bold mb-3">Profile Details</h2>
+      <dl class="row mb-0">
+        <dt class="col-sm-4">Name</dt><dd class="col-sm-8">{{ current_user.name }}</dd>
+        <dt class="col-sm-4">Email</dt><dd class="col-sm-8">{{ current_user.email }}</dd>
+        <dt class="col-sm-4">Created</dt><dd class="col-sm-8">{{ current_user.created_at.strftime('%d %b %Y') if current_user.created_at else '-' }}</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="col-12 col-lg-7">
+    <div class="ft-card p-4 mb-4">
+      <h2 class="h5 fw-bold mb-3">Change Password</h2>
+      <form method="post" action="{{ url_for('profile.change_password') }}">
+        {{ change_password_form.hidden_tag() }}
+        <div class="row">
+          <div class="col-md-4">{{ render_field(change_password_form.current_password) }}</div>
+          <div class="col-md-4">{{ render_field(change_password_form.new_password) }}</div>
+          <div class="col-md-4">{{ render_field(change_password_form.confirm_password) }}</div>
+        </div>
+        {{ submit_button('Update Password') }}
+      </form>
+    </div>
+    <div class="ft-card p-4">
+      <h2 class="h5 fw-bold mb-3 text-danger">Delete Account</h2>
+      <p class="ft-soft mb-3">This removes your user record, wallets, expenses, income, categories, and pending OTP records.</p>
+      <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">Confirm account deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{{ url_for('profile.delete_account') }}">
+          {{ delete_account_form.hidden_tag() }}
+          {{ render_field(delete_account_form.password) }}
+          {{ render_field(delete_account_form.confirm) }}
+          {{ submit_button('Delete Account', 'btn-danger') }}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

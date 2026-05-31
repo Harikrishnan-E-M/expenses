@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import render_field, submit_button %}
+{% block title %}Categories | FinTrack INR{% endblock %}
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h1 class="h3 fw-bold mb-1">Categories</h1>
+    <p class="ft-soft mb-0">Keep expense and income labels consistent for reporting.</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-5">
+    <div class="ft-card p-4 h-100">
+      <h2 class="h5 fw-bold mb-3">Add Category</h2>
+      <form method="post" action="{{ url_for('categories.new') }}">
+        {{ form.hidden_tag() }}
+        {{ render_field(form.category_type) }}
+        {{ render_field(form.name) }}
+        {{ submit_button('Save Category') }}
+      </form>
+    </div>
+  </div>
+  <div class="col-12 col-lg-7">
+    <div class="ft-card p-4 mb-4">
+      <h2 class="h5 fw-bold mb-3">Expense Categories</h2>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <tbody>
+            {% for category in expense_categories %}
+            <tr>
+              <td>{{ category.name }}</td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('categories.edit', category_type='expense', category_id=category._id) }}">Edit</a>
+                <form class="d-inline" method="post" action="{{ url_for('categories.delete', category_type='expense', category_id=category._id) }}">
+                  {{ delete_form.hidden_tag() }}
+                  <input type="hidden" name="confirm" value="y">
+                  <button class="btn btn-sm btn-outline-danger" type="submit" data-confirm-text="Delete this expense category?">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="ft-card p-4">
+      <h2 class="h5 fw-bold mb-3">Income Categories</h2>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <tbody>
+            {% for category in income_categories %}
+            <tr>
+              <td>{{ category.name }}</td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('categories.edit', category_type='income', category_id=category._id) }}">Edit</a>
+                <form class="d-inline" method="post" action="{{ url_for('categories.delete', category_type='income', category_id=category._id) }}">
+                  {{ delete_form.hidden_tag() }}
+                  <input type="hidden" name="confirm" value="y">
+                  <button class="btn btn-sm btn-outline-danger" type="submit" data-confirm-text="Delete this income category?">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import render_field, submit_button %}
+{% block title %}Register | FinTrack INR{% endblock %}
+{% block content %}
+<div class="row justify-content-center py-4 py-lg-5">
+  <div class="col-12 col-lg-7">
+    <div class="page-hero p-4 p-lg-5 mb-4">
+      <span class="ft-chip mb-3">OTP protected registration</span>
+      <h1 class="h3 fw-bold mb-2">Create your FinTrack INR account</h1>
+      <p class="ft-soft mb-0">We verify your email with a 6-digit OTP before creating the account.</p>
+    </div>
+    <div class="ft-card p-4 p-lg-5">
+      <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="row">
+          <div class="col-md-6">{{ render_field(form.name) }}</div>
+          <div class="col-md-6">{{ render_field(form.email) }}</div>
+        </div>
+        {{ render_field(form.password) }}
+        {{ submit_button('Send OTP') }}
+      </form>
+      <div class="mt-4 text-center">
+        <span class="ft-soft">Already registered?</span> <a href="{{ url_for('auth.login') }}">Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

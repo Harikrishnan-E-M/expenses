@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import submit_button %}
+{% block title %}Wallets | FinTrack INR{% endblock %}
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h1 class="h3 fw-bold mb-1">Wallets</h1>
+    <p class="ft-soft mb-0">Manage bank accounts, cash, cards, and investment wallets.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('wallets.new') }}">Add Wallet</a>
+</div>
+
+<div class="ft-card p-4">
+  {% if wallets %}
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Name</th><th>Type</th><th>Opening</th><th>Current</th><th>Created</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for wallet in wallets %}
+        <tr>
+          <td>{{ wallet.wallet_name }}</td>
+          <td><span class="badge rounded-pill badge-soft-primary">{{ wallet.wallet_type }}</span></td>
+          <td>₹ {{ '%.2f'|format(wallet.opening_balance) }}</td>
+          <td><strong>₹ {{ '%.2f'|format(wallet.current_balance) }}</strong></td>
+          <td>{{ wallet.created_at.strftime('%d %b %Y') if wallet.created_at else '-' }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('wallets.edit', wallet_id=wallet._id) }}">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteWallet{{ wallet._id }}">Delete</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state text-center">
+    <h2 class="h5 fw-semibold">No wallets yet</h2>
+    <p class="ft-soft mb-3">Create your first wallet to start tracking money flows in ₹ INR.</p>
+    <a class="btn btn-primary" href="{{ url_for('wallets.new') }}">Add Wallet</a>
+  </div>
+  {% endif %}
+</div>
+
+{% for wallet in wallets %}
+<div class="modal fade" id="deleteWallet{{ wallet._id }}" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete wallet</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Deleting <strong>{{ wallet.wallet_name }}</strong> is permanent and requires confirmation.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" action="{{ url_for('wallets.delete', wallet_id=wallet._id) }}">
+          {{ delete_form.hidden_tag() }}
+          <input type="hidden" name="confirm" value="y">
+          <button class="btn btn-danger" type="submit">Delete Wallet</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

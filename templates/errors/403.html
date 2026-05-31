@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Forbidden | FinTrack INR{% endblock %}
+{% block content %}
+<div class="row justify-content-center py-5">
+  <div class="col-12 col-lg-6 text-center">
+    <div class="ft-card p-5">
+      <h1 class="display-5 fw-bold mb-3">403</h1>
+      <p class="ft-soft mb-4">You do not have permission to access this resource.</p>
+      <a class="btn btn-primary" href="{{ url_for('dashboard.home') if current_user.is_authenticated else url_for('auth.login') }}">Go Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

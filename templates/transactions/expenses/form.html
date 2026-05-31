@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import render_field, submit_button %}
+{% block title %}{{ title }} | FinTrack INR{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="ft-card p-4 p-lg-5">
+      <h1 class="h3 fw-bold mb-4">{{ title }}</h1>
+      <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="row">
+          <div class="col-md-6">{{ render_field(form.wallet_id) }}</div>
+          <div class="col-md-6">{{ render_field(form.category_id) }}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">{{ render_field(form.amount) }}</div>
+          <div class="col-md-6">{{ render_field(form.date) }}</div>
+        </div>
+        {{ render_field(form.title) }}
+        {{ render_field(form.description) }}
+        {{ submit_button('Save Expense') }}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

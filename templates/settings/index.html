@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Settings | FinTrack INR{% endblock %}
+{% block content %}
+<div class="page-hero p-4 p-lg-5 mb-4">
+  <span class="ft-chip mb-3">Application settings</span>
+  <h1 class="h2 fw-bold mb-2">Settings</h1>
+  <p class="ft-soft mb-0">This deployment is configured for secure browser sessions, HTTPS, and user-scoped financial data.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-6">
+    <div class="ft-card p-4 h-100">
+      <h2 class="h5 fw-bold mb-3">Security posture</h2>
+      <ul class="mb-0">
+        <li>CSRF protection enabled for all forms</li>
+        <li>Secure, HTTP-only, SameSite=Lax session cookies</li>
+        <li>Rate limits for login and OTP actions</li>
+        <li>Security headers for modern browsers</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-12 col-lg-6">
+    <div class="ft-card p-4 h-100">
+      <h2 class="h5 fw-bold mb-3">Quick links</h2>
+      <div class="d-grid gap-2">
+        <a class="btn btn-outline-secondary" href="{{ url_for('profile.index') }}">Profile</a>
+        <a class="btn btn-outline-secondary" href="{{ url_for('reports.index') }}">Reports</a>
+        <a class="btn btn-outline-secondary" href="{{ url_for('wallets.index') }}">Wallets</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
